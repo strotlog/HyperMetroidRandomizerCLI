@@ -2,7 +2,6 @@
 using System.IO;
 using SuperMetroidRandomizer.IO;
 using SuperMetroidRandomizer.Net;
-using SuperMetroidRandomizer.Properties;
 using SuperMetroidRandomizer.Rom;
 
 namespace SuperMetroidRandomizer.Random
@@ -15,8 +14,7 @@ namespace SuperMetroidRandomizer.Random
         Casual,
         Speedrunner,
         Masochist,
-        FunTime,
-        Insane,
+        Max,
     }
 
     
@@ -63,19 +61,15 @@ namespace SuperMetroidRandomizer.Random
             string usedFilename = FileName.Fix(filename, string.Format(romLocations.SeedFileString, seed));
             var hideLocations = !(romLocations is RomLocationsCasual);
 
-            using (var rom = new FileStream(usedFilename, FileMode.OpenOrCreate))
-            {
+            byte[] rombytes = File.ReadAllBytes("Hyper_Metroid_Rando_Base_ROM.sfc");
 
             			//rom.Write(Resources.RomImageSMPB072VP, 0, 3211264);
             			//For the vanilla palettes version
 
-           
-             rom.Write(Resources.RomImage, 0, 4194304);
 
 				
                 foreach (var location in romLocations.Locations)
                 {
-                    rom.Seek(location.Address, SeekOrigin.Begin);
                     var newItem = new byte[2];
 
                     if (!location.NoHidden && location.Item.Type != ItemType.Nothing && location.Item.Type != ItemType.ChargeBeam && location.ItemStorageType == ItemStorageType.Normal)
@@ -100,97 +94,31 @@ namespace SuperMetroidRandomizer.Random
                             break;
                     }
 
-                    rom.Write(newItem, 0, 2);
+                    // write item (2-byte plm write)
+                    rombytes[location.Address] = newItem[0];
+                    rombytes[location.Address+1] = newItem[1];
 
                     if (location.Item.Type == ItemType.Nothing)
                     {
                         // give same index as morph ball
-                        rom.Seek(location.Address + 4, SeekOrigin.Begin);
-                        rom.Write(StringToByteArray("\x0c"), 0, 1);
+                        rombytes[location.Address + 4] = StringToByteArray("\x0c")[0];
                     }
 
                     if (location.Item.Type == ItemType.ChargeBeam)
                     {
                         // we have 4 copies of charge to reduce tedium, give them all the same index
                         //I chose to remove this for now to make it a bit more obvious that there aren't mistakes in the randomizing process
-                        rom.Seek(location.Address + 4, SeekOrigin.Begin);
-                       rom.Write(StringToByteArray("\xff"), 0, 1);
+                        rombytes[location.Address + 4] = StringToByteArray("\xff")[0];
                        //index ff may cause problems
                     }
                 }
-
-                WriteSeedInRom(rom);
-                WriteControls(rom);
-
-                rom.Close();
-            }
 
             if (log != null)
             {
                 log.WriteLog(usedFilename);
             }
-        }
 
-        private void WriteControls(FileStream rom)
-        {
-            foreach (var address in Controller.ShotAddresses)
-            {
-                rom.Seek(address, SeekOrigin.Begin);
-
-                rom.Write(StringToByteArray(Controller.Buttons[Settings.Default.ControlsShot]), 0, 2);
-            }
-
-            foreach (var address in Controller.JumpAddresses)
-            {
-                rom.Seek(address, SeekOrigin.Begin);
-
-                rom.Write(StringToByteArray(Controller.Buttons[Settings.Default.ControlsJump]), 0, 2);
-            }
-
-            foreach (var address in Controller.DashAddresses)
-            {
-                rom.Seek(address, SeekOrigin.Begin);
-
-                rom.Write(StringToByteArray(Controller.Buttons[Settings.Default.ControlsDash]), 0, 2);
-            }
-
-            foreach (var address in Controller.ItemSelectAddresses)
-            {
-                rom.Seek(address, SeekOrigin.Begin);
-
-                rom.Write(StringToByteArray(Controller.Buttons[Settings.Default.ControlsItemSelect]), 0, 2);
-            }
-
-            foreach (var address in Controller.ItemCancelAddresses)
-            {
-                rom.Seek(address, SeekOrigin.Begin);
-
-                rom.Write(StringToByteArray(Controller.Buttons[Settings.Default.ControlsItemCancel]), 0, 2);
-            }
-
-            foreach (var address in Controller.AngleUpAddresses)
-            {
-                rom.Seek(address, SeekOrigin.Begin);
-
-                rom.Write(StringToByteArray(Controller.Buttons[Settings.Default.ControlsAngleUp]), 0, 2);
-            }
-
-            foreach (var address in Controller.AngleDownAddresses)
-            {
-                rom.Seek(address, SeekOrigin.Begin);
-
-                rom.Write(StringToByteArray(Controller.Buttons[Settings.Default.ControlsAngleDown]), 0, 2);
-            }
-            
-            
-
-        }
-
-        private void WriteSeedInRom(FileStream rom)
-        {	
-            string seedStr = string.Format(romLocations.SeedRomString, RandomizerVersion.Current, seed.ToString().PadLeft(7, '0')).PadRight(21).Substring(0, 21);
-            rom.Seek(0x7fc0, SeekOrigin.Begin);
-            rom.Write(StringToByteArray(seedStr), 0, 21);
+            File.WriteAllBytes(usedFilename, rombytes);
         }
 
         private static byte[] StringToByteArray(string input)

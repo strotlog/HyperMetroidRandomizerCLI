@@ -1,23 +1,79 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
+using System.Threading.Tasks;
+using CommandLine; // from NuGet
+
+using SuperMetroidRandomizer.Random;
 
 namespace SuperMetroidRandomizer
 {
     static class Program
     {
+        public class Options
+        {
+            [Option('s', "seed", Required = false, Default = 0, HelpText = "Seed number to produce the same randomization as someone else using the same copy of this program (0 or unset -> random seed)")]
+            public int seed { get; set; }
+
+            [Option('d', "difficulty", Required = true, HelpText = "Difficulty: Casual, Veteran, Masochist, or Max")]
+            public string difficulty { get; set; }
+        }
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
-        [STAThread]
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+            CommandLine.Parser.Default.ParseArguments<Options>(args)
+                .WithParsed(Main2)
+                .WithNotParsed(HandleParserError);
         }
 
+        public static void HandleParserError(IEnumerable<Error> errs)
+        {
+        }
 
+        static public void Main2(Options cli)
+        {
+            string difficultyStr = cli.difficulty;
+            difficultyStr = difficultyStr.ToLower();
+            if (difficultyStr.Length > 0 ) {
+                difficultyStr = char.ToUpper(difficultyStr[0]) + difficultyStr.Substring(1);
+            }
+            RandomizerDifficulty difficulty;
+            switch (difficultyStr) {
+                case "Casual":
+                    difficulty = RandomizerDifficulty.Casual;
+                    break;
+                case "Veteran":
+                    difficulty = RandomizerDifficulty.Speedrunner;
+                    break;
+                case "Masochist":
+                    difficulty = RandomizerDifficulty.Masochist;
+                    break;
+                case "Max":
+                    difficulty = RandomizerDifficulty.Max;
+                    break;
+                default:
+                    Console.WriteLine("--difficulty <Casual, Veteran, Masochist, Max> is required");
+                    return;
+            }
+
+            int seed;
+            if (cli.seed == 0) {
+                seed = (new SeedRandom()).Next(10 * 1000 * 1000); // 10 million possible random seeds.
+            } else {
+                seed = cli.seed;
+            }
+            string romname = string.Format("Hyper Metroid {0}{1}.sfc",
+                                           (difficulty == RandomizerDifficulty.Max ? 'X' : difficultyStr[0]),
+                                           seed);
+
+            var romLocations = SuperMetroidRandomizer.Rom.RomLocationsFactory.GetRomLocations(difficulty);
+            var randomizerV11 = new RandomizerV11(seed, romLocations, null);
+            randomizerV11.CreateRom(romname);
+
+            Console.WriteLine("Wrote: {0}", romname);
+        }
     }
 }

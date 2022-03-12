@@ -12,8 +12,8 @@ namespace SuperMetroidRandomizer.Rom
                     return new RomLocationsCasual();
                 case RandomizerDifficulty.Masochist:
                     return new RomLocationsMasochist();
-                case RandomizerDifficulty.Insane:
-                    return new RomLocationsInsane();
+                case RandomizerDifficulty.Max:
+                    return new RomLocationsMax();
                 default:
                     return new RomLocationsSpeedrunner();
             }

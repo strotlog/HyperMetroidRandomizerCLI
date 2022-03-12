@@ -1,0 +1,10 @@
+/Hyper_Metroid_Rando_Base_ROM.sfc
+/Hyper Metroid*.sfc
+/bin/*
+/obj/*
+
+# vim:
+[._]sw[a-p]
+*.swp
+*.swo
+*~

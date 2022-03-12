@@ -1,5 +1,38 @@
 # Hyper Metroid Item Randomizer
-# Downloads: [Hyper Metroid Item Randomizer v1.10](https://github.com/Galamoz/HyperMetroidRandomizer/releases/download/1.10/Hyper.Metroid.Item.Randomizer.v1.10.exe)
+Command Line Interface (CLI) edition fork by strotlog
+
+Should work on various platforms including Linux and macOS!
+
+## How to use CLI
+
+Prerequisite 1: Install the .NET 6 SDK
+Get from [dot.net/download](https://dot.net/download) and install
+
+Prerequisite 2: Generate the base rando ROM:
+1. `git clone https://github.com/strotlog/HyperMetroidRandomizerCLI`
+2. Copy your unheadered, legal backup of Super Metroid to 'HyperMetroidRandomizerCLI/Hyper\_Metroid\_Rando\_Base\_ROM.sfc'
+3. Download the latest unheadered [Hyper Metroid](https://metroidconstruction.com/hack.php?id=294) ips file (as of this writing, 1.0)
+4. Extract the ips file from the rar file using a local tool or [extract.me](https://extract.me)
+5. Apply the ips using Lunar IPS or a [Web ROM patcher](https://www.marcrobledo.com/RomPatcher.js/). Overwrite 'Hyper\_Metroid\_Rando\_Base\_ROM.sfc' with the outcome.
+6. Apply 'PatchesCombined.ips', which was cloned from git, in the same way as step 5, overwriting the ROM.
+7. Apply '', which was cloned from git, in the same way as step 5, overwriting the ROM.
+
+The resulting checksum should be:
+
+    $ shasum ./Hyper_Metroid_Rando_Base_ROM.sfc
+    a033798b072c61ab55c32ecd0082652fa1a2f345  ./Hyper_Metroid_Rando_Base_ROM.sfc
+
+Then to generate a randomized ROM,
+
+    dotnet run -- --difficulty Casual
+
+difficulty can be Casual, Veteran, Masochist, or Max (Max is experimental, appeared to be commented out in the original rando)
+
+Original repo: [Hyper Metroid Item Randomizer by Galamoz](https://github.com/Galamoz/HyperMetroidRandomizer)
+
+Original readme follows:
+
+--------------
 
 #### Hyper Metroid Randomizer Resources
 ##### Full game map reference with item names: https://i.imgur.com/ub7CYrA.png
