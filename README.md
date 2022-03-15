@@ -1,7 +1,7 @@
 # Hyper Metroid Item Randomizer
 Command Line Interface (CLI) edition fork by strotlog
 
-Should work on various platforms including Linux and macOS!
+Works on various platforms including Linux and macOS!
 
 ## How to use CLI
 
@@ -26,6 +26,10 @@ Then to generate a randomized ROM,
     dotnet run -- --difficulty Casual
 
 difficulty can be Casual, Veteran, Masochist, or Max (Max is experimental, appeared to be commented out in the original rando)
+
+### Github info
+
+This repo is shown as "17+N commits ahead, 17 commits behind" the original due to removal of a file from this fork's repo history. The 17 commits are otherwise actually identical between the repos, but unfortunately git considers these commits as divergent.
 
 Original repo: [Hyper Metroid Item Randomizer by Galamoz](https://github.com/Galamoz/HyperMetroidRandomizer)
 

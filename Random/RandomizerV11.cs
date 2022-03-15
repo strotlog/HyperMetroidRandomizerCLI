@@ -17,7 +17,7 @@ namespace SuperMetroidRandomizer.Random
         Max,
     }
 
-    
+
     public class RandomizerV11
     {
         private static SeedRandom random;
@@ -27,7 +27,7 @@ namespace SuperMetroidRandomizer.Random
         private readonly IRomLocations romLocations;
         private RandomizerLog log;
 
-	    public RandomizerV11(int seed, IRomLocations romLocations, RandomizerLog log)
+        public RandomizerV11(int seed, IRomLocations romLocations, RandomizerLog log)
         {
             random = new SeedRandom(seed);
             this.romLocations = romLocations;
@@ -43,7 +43,11 @@ namespace SuperMetroidRandomizer.Random
             }
 
             GenerateItemList();
-            GenerateItemPositions();
+            string errorStringToReturn = GenerateItemPositions();
+            if (errorStringToReturn != "")
+            {
+                return errorStringToReturn;
+            }
             WriteRom(filename);
 
             if (spoilerOnly)
@@ -53,7 +57,7 @@ namespace SuperMetroidRandomizer.Random
 
             WriteRom(filename);
 
-            return "";
+            return "OK";
         }
 
         private void WriteRom(string filename)
@@ -135,11 +139,18 @@ namespace SuperMetroidRandomizer.Random
             return retVal;
         }
 
-        private void GenerateItemPositions()
+        // returns error string on error, empty string if no error
+        private string GenerateItemPositions()
         {
             do
             {
                 var currentLocations = romLocations.GetAvailableLocations(haveItems);
+                if (currentLocations.Count == 0) {
+                    return string.Format("Error: No placeable locations after placing {0} items (including any nothings). Try a different seed (this seed was: {1}, difficulty: {2})",
+                                         100 - itemPool.Count,
+                                         seed,
+                                         romLocations.DifficultyName);
+                }
                 var candidateItemList = new List<ItemType>();
 
                 // Generate candidate item list
@@ -196,6 +207,8 @@ namespace SuperMetroidRandomizer.Random
             {
                 log.AddGeneratedItems(romLocations.Locations);
             }
+
+            return "";
         }
 
         private void GenerateItemList()

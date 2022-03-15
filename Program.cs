@@ -31,6 +31,7 @@ namespace SuperMetroidRandomizer
 
         public static void HandleParserError(IEnumerable<Error> errs)
         {
+            Environment.Exit(1);
         }
 
         static public void Main2(Options cli)
@@ -65,15 +66,23 @@ namespace SuperMetroidRandomizer
             } else {
                 seed = cli.seed;
             }
-            string romname = string.Format("Hyper Metroid {0}{1}.sfc",
+            string romname = string.Format("Hyper Metroid {0}{1:0000000}.sfc",
                                            (difficulty == RandomizerDifficulty.Max ? 'X' : difficultyStr[0]),
                                            seed);
 
             var romLocations = SuperMetroidRandomizer.Rom.RomLocationsFactory.GetRomLocations(difficulty);
             var randomizerV11 = new RandomizerV11(seed, romLocations, null);
-            randomizerV11.CreateRom(romname);
+            string ret = randomizerV11.CreateRom(romname);
 
-            Console.WriteLine("Wrote: {0}", romname);
+            if (ret == "OK")
+            {
+                Console.WriteLine("Wrote: {0}", romname);
+            } else {
+                // ret should contain an error
+                Console.WriteLine("(Version {0})", System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
+                Console.WriteLine(ret);
+                Environment.Exit(1);
+            }
         }
     }
 }

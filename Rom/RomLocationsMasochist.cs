@@ -1740,6 +1740,12 @@ private static bool BossArea(List<ItemType> have)
         public List<Location> GetAvailableLocations(List<ItemType> haveItems)
         {
             var retVal = (from Location location in Locations where (location.Item == null) && location.CanAccess(haveItems) select location).ToList();
+            if (retVal.Count == 0)
+            {
+                // something is wrong
+                return retVal;
+            }
+
             var currentWeight = (from item in retVal orderby item.Weight descending select item.Weight).First() + 1;
 
             foreach (var item in retVal.Where(item => item.Weight == 0))
